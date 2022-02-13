@@ -1,9 +1,6 @@
 name: Build Plugin
 
-on:
-  push:
-    branches:
-      - master
+on: workflow_dispatch
 
 jobs:
   build:
@@ -12,7 +9,7 @@ jobs:
     steps:
       - name: Initial Checks
         run: |
-          if [ ${{ github.event.event_type }} != "plugin_build" ]; then
+          if [ "${{ github.event.event_type }}" != "plugin_build" ]; then
             echo "No client payload data detected! This workflow can only be run with an HTTP request or using the backend.";
             exit 1;
           fi
