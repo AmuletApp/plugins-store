@@ -1,24 +1,36 @@
 name: Build Plugin
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      owner:
+        type: string
+        description: The owner of the plugin's repository.
+        required: true
+      repository:
+        type: string
+        description: The repository name.
+        required: true
+        default: redditvanced-plugins
+      plugin:
+        type: string
+        description: The plugin to build.
+        required: true
+      ref:
+        type: string
+        description: The target commit hash of the repo to clone or branch name.
+        required: true
 
 jobs:
   build:
     timeout-minutes: 8
     runs-on: ubuntu-20.04
     steps:
-      - name: Initial Checks
-        run: |
-          if [ "${{ github.event.event_type }}" != "plugin_build" ]; then
-            echo "No client payload data detected! This workflow can only be run with an HTTP request or using the backend.";
-            exit 1;
-          fi
-
       - name: Checkout Target Plugin Repo
         uses: actions/checkout@v2
         with:
-          ref: "${{ github.event.client_payload.targetCommit }}"
-          repository: "${{ github.event.client_payload.owner }}/${{ github.event.client_payload.repo }}"
+          ref: "${{ github.event.inputs.ref }}"
+          repository: "${{ github.event.inputs.owner }}/${{ github.event.inputs.repository }}"
           path: "plugin"
 
       - name: Setup JDK 11
@@ -34,7 +46,7 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE/plugin
           chmod +x gradlew
-          CI=true ./gradlew :${{ github.event.client_payload.plugin }}:make
+          CI=true ./gradlew :${{ github.event.inputs.plugin }}:make
 
       - name: Checkout Plugins Store
         uses: actions/checkout@v2
@@ -43,10 +55,10 @@ jobs:
 
       - name: Push builds
         run: |
-          cp $GITHUB_WORKSPACE/plugin/**/${{ github.event.client_payload.plugin }}/build/${{ github.event.client_payload.plugin }}.zip
+          cp $GITHUB_WORKSPACE/plugin/**/build/*.zip
           cd $GITHUB_WORKSPACE/plugins-store
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
-          git add *
-          git commit -m "Build ${{ github.event.client_payload.plugin }}" || exit 0
+          git add ${{ github.event.inputs.plugin }}.zip
+          git commit -m "Build ${{ github.event.inputs.plugin }}" || exit 0
           git push
