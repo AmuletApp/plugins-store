@@ -40,7 +40,7 @@ jobs:
           distribution: zulu
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v2
+        uses: android-actions/setup-android@1685c3d8669829f192d94fcad89eba25ce558bb2
 
       - name: Build Plugin
         run: |
