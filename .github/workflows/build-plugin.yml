@@ -61,8 +61,8 @@ jobs:
 
       - name: Push builds
         run: |
-          cp $GITHUB_WORKSPACE/plugin/**/build/*.zip
           cd $GITHUB_WORKSPACE/plugins-store
+          cp $GITHUB_WORKSPACE/plugin/**/build/*.zip .
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
           git add ${{ github.event.inputs.plugin }}.zip
